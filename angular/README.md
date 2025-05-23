@@ -455,27 +455,233 @@ const routes: Routes = [
 ];
 ```
 
-**Guards**
+## Reactive forms
 
+Los formularios reactivos proveen un modelo para manejar las entradas de los datos cuáles cambian a través del tiempo.
 
-### Router outlet
+**Agrega un form control**
 
-### Router links
+1. Genera un nuevo componente e importa de @angularform lo siguiente:
+   1. FormControl
+   2. ReactiveFormModule
+2. Crea una instancia de FormControl
+3. Registra el FormControl en el template
 
-## Forms
+> Componente
 
-### Reactive forms
+```typescript
+import {Component} from '@angular/core';
+import {FormControl, ReactiveFormsModule} from '@angular/forms';
+@Component({
+  selector: 'app-name-editor',
+  templateUrl: './name-editor.component.html',
+  styleUrls: ['./name-editor.component.css'],
+  imports: [ReactiveFormsModule],
+})
+export class NameEditorComponent {
+  name = new FormControl('');
+...
+}
+```
 
-### Strictly typed reactive forms
+> Template
 
-### Validate form input
+`code`
 
-## Http Client
+> Muestra el valor del form control
+
+```
+<p>Value: {{ name.value }}</p>
+```
+
+> Remplaza el valor del form value declarando un método desde el componente
+
+```typescript
+updateName() {
+    this.name.setValue('Nancy');
+  }
+```
+
+> Asigna el método a un evento dentro del template
+
+```html
+<button type="button" (click)="updateName()">Update Name</button>
+```
+
+**Agrupa form controls**
+
+Para agrupar un formulario en un componente debes realizar lo siguiente:
+
+1. Crear una instancia de FormGroup
+2. Asocia la instancia del FormGroup con tu modelo
+3. Guarda los datos del formulario
+
+> Componente
+
+```typescript
+import {Component} from '@angular/core';
+import {FormGroup, FormControl, ReactiveFormsModule} from '@angular/forms';
+@Component({
+  selector: 'app-profile-editor',
+  templateUrl: './profile-editor.component.html',
+  styleUrls: ['./profile-editor.component.css'],
+  imports: [ReactiveFormsModule],
+})
+export class ProfileEditorComponent {
+  profileForm = new FormGroup({
+    firstName: new FormControl(''),
+    lastName: new FormControl(''),
+...
+  });
+...
+}
+```
+
+> Asocia los formularios agrupados en el template
+
+```typescript
+<form [formGroup]="profileForm">
+  <label for="first-name">First Name: </label>
+  <input id="first-name" type="text" formControlName="firstName" />
+  <label for="last-name">Last Name: </label>
+  <input id="last-name" type="text" formControlName="lastName" />
+...
+</form>
+```
+
+> Guarda los datos del formulario a través de un método
+
+```html
+<form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+```
+
+> Componente
+>
+> ```typescript
+> onSubmit() {
+>     // TODO: Codifica la lógica de salvado
+>     console.warn(this.profileForm.value);
+>   }
+> ```
+
+**Usa FormBuilder Service para generar controles**
+
+Realizar form controls es muy repetitivo cuando manejamos varios formularios. Este servicio provee métodos para facilitarnos la vida
+
+Realiza los siguiente pasos:
+
+1. Importa la clase FormBuilder
+
+   ```
+   import {FormBuilder, ReactiveFormsModule} from '@angular/forms';
+   ```
+2. Inyecta el servicio
+
+   ```
+   private formBuilder = inject(FormBuilder);
+   ```
+3. Genera el contenido del formulario
+
+   ```
+   profileForm = this.formBuilder.group({
+       firstName: [''],
+       lastName: [''],
+       address: this.formBuilder.group({
+         street: [''],
+         city: [''],
+         state: [''],
+         zip: [''],
+       }),
+   ...
+     });
+   ```
+
+> Valida un form input
+
+Para validad inputs debemos hacer lo siguiente:
+
+1. Importar una función "validator" en el componente del formulario
+
+   ```
+   import {Validators} from '@angular/forms';
+   ```
+2. Agrega el validator en el campo del formulario
+
+   ```
+   private formBuilder = inject(FormBuilder);
+     profileForm = this.formBuilder.group({
+       firstName: ['', Validators.required],
+       lastName: [''],
+       address: this.formBuilder.group({
+         street: [''],
+         city: [''],
+         state: [''],
+         zip: [''],
+       }),
+   ...
+     });
+   ```
+3. Agrega la lógica para manejar el estado de la validación
+
+```html
+<p>Form Status: {{ profileForm.status }}</p>
+```
+
+### Http Client
+
+Para poder comunicarse con un servidor debemos ocupar httpClient, para descargar los datos y acceder a los servicios backend.
+
+**Configura httpClient**
+
+> app.config.ts
+
+```
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideHttpClient(
+      withFetch(),
+    ),
+  ]
+};
+```
 
 ### Making requests
 
-### Intercepting requests and responses
+HttpCliente tiene métodos que corresponde a diferente Http verbs usados para hacer peticiones. Cada uno de estos métodos retorna un RxJS Observable cual, cuando es suscrito, envia una petición y emite los resultados cuando el servidor responde
 
-## Dev tools
+> Fetchin gJSON Data
 
-### Angular CLI
+Fetching data desde el backend normalmente requiere una petición GET usando **.get ().** Este método recibe dos argumentos:
+
+* endpoints
+* (opcional) un objeto que opciones para la solicitud
+
+```
+http.get<Config>('/api/config').subscribe(config => {
+  // process the configuration.
+});
+```
+
+> Configura los params
+
+Especificar los parámetros de una petición usando **params** 
+
+```
+http.get('/api/config', {
+  params: {filter: 'all'},
+}).subscribe(config => {
+  // ...
+});
+```
+
+> Configura los headers
+
+```
+http.get('/api/config', {
+  headers: {
+    'X-Debug-Level': 'verbose',
+  }
+}).subscribe(config => {
+  // ...
+});
+```
