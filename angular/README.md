@@ -147,43 +147,33 @@ Se inicializa el componente.
 
 **Detección de cambios**
 
-
-
 Se ejecuta una vez cuando se ha inicializado el componente
 
 `ngOnInit()`
-
-
 
 Se ejecuta cada vez que los inputs de los componentes han cambiado
 
 `ngOnChanges()`
 
-
 Se ejecuta cada vez que el componente ha checado los cambios
 
 `ngDoCheck()`
-
 
 Se ejecuta solamente una vez después que el componente ha sido inicializado
 
 `ngAfterContentInit()`
 
-
 Se ejecuta una vez que el contenido del componente ha sido checado o verificado por cambios
 
 `ngAfterContentChecked()`
-
 
 Se ejecuta una vez, después que la vista del componente ha sido inicializada
 
 `ngAfterViewInit()`
 
-
 Se ejecuta cada vez que la vista del componente ha sido checado para cambios
 
 `ngAfterViewChecked()`
-
 
 **Renderizado**
 
@@ -195,13 +185,11 @@ Se ejecuta cada vez que todos los componentes han sido renderizados en el DOM
 
 `afterRender()`
 
-
 **Destrucción**
 
 Se ejecuta una vez, antes que se destruya el componente.
 
 `ngOnDestroy()`
-
 
 ## Templates
 
@@ -212,10 +200,6 @@ Cada componente tiene un **template** que define el DOM que el componente se ren
 * Event listening
 * Variables
 * Etc
-
-### Dynamic text with text interpolation
-
-### Dynamic properties and attributes
 
 ### Event listeners
 
@@ -235,23 +219,74 @@ Las two-way binding es una forma abreviada de vincular simultáneamente un valor
 <input type="text" [(ngModel)]="firstName" />
 ```
 
-**Form controls**
-
-**Entre componentes**
-
 ### Control flow
 
 **@if, @else-if, @else**
 
+@if es un bloque condicional que muestra el contenido cuando su expresión es verdadera
+
+@else-if si quiere anidar otra condición
+
+@else en caso que ninguna condición se cumpla
+
+```
+@if (a > b) {
+  {{a}} is greater than {{b}}
+} @else if (b > a) {
+  {{a}} is less than {{b}}
+} @else {
+  {{a}} is equal to {{b}}
+}
+```
+
 **@for**
 
-**¿Por qué se debe utilizar track en las iteracions  ****@for**
+@for es un ciclo que pasa a través de una colección y repetidamente renderiza el contenido del bloque. 
+
+```
+@for (item of items; track item.id) {
+  {{ item.name }}
+}
+```
+
+**¿Por qué se debe utilizar track en las iteraciones @for?**
+
+Las expresiones con track permiten mantener una relación entre tus datos y el DOM en la página gracias a esto optimizas el perfomance ejecutando el mínimo necesario.
+
+> Para colecciones estáticas se recomienda utilizar $index
+
+```
+@for (item of items; track item.id; let idx = $index, e = $even) {
+  <p>Item #{{ idx }}: {{ item.name }}</p>
+}
+```
 
 **Fallback con @empty**
+
+En caso que tu colección se encuentre vacía puedes aplicar un fallback después del bloque for, cuando esto suceda se mostrará lo que le indiques dentro del fallback, debería ser un empty state
 
 > Fallback: comportamientos por defecto
 
 **@switch**
+
+El bloque switch es una alternativa con una sintaxis diferente para renderizar datos.
+
+```
+@switch (userPermissions) {
+  @case ('admin') {
+    <app-admin-dashboard />
+  }
+  @case ('reviewer') {
+    <app-reviewer-dashboard />
+  }
+  @case ('editor') {
+    <app-editor-dashboard />
+  }
+  @default {
+    <app-viewer-dashboard />
+  }
+}
+```
 
 ### Pipes
 
@@ -262,33 +297,115 @@ Los pipes son operadores especiales dentro de los templates que permiten transfo
 **Lista de pipes**
 
 * AsyncPipe
+  * Lee un valor de promise o RxJS
 * CurrencyPipe
+  * Transforma un número a un cambio de moneda en string.
 * DatePipe
+  * Formatea el valor de la fecha acordado en la reglas locales
 * DecimalPipe
+  * Transforma un número en un string con un punto decimal, formateado con base a las reglas locales
 * I18nPluralPipe
+  * Mapea un valor pluralizando el mismo acorde a las reglas locales
 * JsonPipe
+  * Transforma un objeto a un string usando JSON.stringify
 * KeyValuePipe
+  * Transforma un objeto en un arreglo de clave-valor
 * LowerCasePipe
+  * Transforma el texto a lowercase
 * PercentPipe
+  * Transforma un número en porcentaje
 * SlicePipe
+  * Crea un nuevo arreglo de elementos
 * TitleCasePipe
+  * Transforma el texto a TitleCase
 * UpperCasePipe
+  * Transforma el texto a upperCase
 
 **¿Cómo usar los pipes?**
 
+El operador pipe se usa con el siguiente símbolo "|", dentro de nuestro template.
+
+`<p>Total: {{ amount | currency }}</p>`
+
 **Combina multiples pipes en la misma expresión**
+
+```
+<p>The event will occur on {{ scheduledOn | date | uppercase }}.</p>
+```
 
 **Pasar parámetros para los pipes**
 
-**Operaciones con pipes**
+Para pasar parametros a un pipe debemos agregar dos puntos al final del mismo.
+
+```
+<p>The event will occur at {{ scheduledOn | date:'hh:mm' }}.</p>
+```
+
+**Con dos valores**
+
+```
+<p>The event will occur at {{ scheduledOn | date:'hh:mm':'UTC' }}.</p>
+```
 
 #### Custom pipes
 
-## Directives
+Para definir un pipe debemos:
+
+* Implementar la interfaz PipeTransform por ende un metodo transform
+* Un nombre que se especificará en el decorador
+
+```
+// kebab-case.pipe.ts
+import { Pipe, PipeTransform } from '@angular/core';
+@Pipe({
+  name: 'kebabCase',
+})
+export class KebabCasePipe implements PipeTransform {
+  transform(value: string): string {
+    return value.toLowerCase().replace(/ /g, '-');
+  }
+}
+```
 
 ## Dependency Injection
 
+Para inyectar una dependencias (o servicios) dentro de un componente, debes instanciar el objeto del servicio.
+
+```
+import { inject } from "@angular/core";
+export class HeroListComponent {
+  private heroService = inject(HeroService);
+}
+```
+
 ## Routing
+
+Para definiar las rutas en un componente se hace de la siguiente manera:
+
+```
+const routes: Routes = [
+  { path: 'first-component', component: FirstComponent },
+  { path: 'second-component', component: SecondComponent },
+];
+```
+
+La primera propiedad se define el path donde se va acceder al componente y la segunda corresponde al componete que se usará
+
+**Agrega las rutas a la apliación** 
+
+Para asignar las rutas dentro de una plantilla debemos agregar el atributo **routerLink.**
+
+```
+<h1>Angular Router App</h1>
+<nav>
+  <ul>
+    <li><a routerLink="/first-component" routerLinkActive="active" ariaCurrentWhenActive="page">First Component</a></li>
+    <li><a routerLink="/second-component" routerLinkActive="active" ariaCurrentWhenActive="page">Second Component</a></li>
+  </ul>
+</nav>
+<!-- The routed views render in the <router-outlet>-->
+<router-outlet />
+```
 
 ### Common routing tasks
 
