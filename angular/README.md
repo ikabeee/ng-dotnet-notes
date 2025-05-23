@@ -241,7 +241,7 @@ Las two-way binding es una forma abreviada de vincular simultáneamente un valor
 
 **@for**
 
-@for es un ciclo que pasa a través de una colección y repetidamente renderiza el contenido del bloque. 
+@for es un ciclo que pasa a través de una colección y repetidamente renderiza el contenido del bloque.
 
 ```
 @for (item of items; track item.id) {
@@ -391,7 +391,7 @@ const routes: Routes = [
 
 La primera propiedad se define el path donde se va acceder al componente y la segunda corresponde al componete que se usará
 
-**Agrega las rutas a la apliación** 
+**Agrega las rutas a la apliación**
 
 Para asignar las rutas dentro de una plantilla debemos agregar el atributo **routerLink.**
 
@@ -404,10 +404,59 @@ Para asignar las rutas dentro de una plantilla debemos agregar el atributo **rou
   </ul>
 </nav>
 <!-- The routed views render in the <router-outlet>-->
-<router-outlet />
+<router-outlet /> 
+ 
 ```
 
-### Common routing tasks
+En caso que ninguna ruta coincida, debes aplicar el operador "**" para dirgir a una página por defecto. Útil para NotFoundPages
+
+```
+const routes: Routes = [
+  { path: 'first-component', component: FirstComponent },
+  { path: 'second-component', component: SecondComponent },
+  { path: '**', component: PageNotFoundComponent },  // Wildcard route for a 404 page
+];
+```
+
+**Rutas anidadas**
+
+Se ocupa la misma estructura pero se agrega la propiedad **children.**
+
+```
+
+const routes: Routes = [
+  {
+    path: 'first-component',
+    component: FirstComponent,
+    children: [
+      {
+        path: 'child-a', // child route path
+        component: ChildAComponent, // child route component that the router renders
+      },
+      {
+        path: 'child-b',
+        component: ChildBComponent, // another child route component that the router renders
+      },
+    ],
+  },
+];
+```
+
+**Lazyloading**
+
+Angular solo cargará los modulos que se le indique. Mientras que la carga de componentes normal se realiza desde el inicio de la aplicación.
+
+```
+const routes: Routes = [
+  {
+    path: 'lazy',
+    loadComponent: () => import('./lazy.component').then(c => c.LazyComponent)
+  }
+];
+```
+
+**Guards**
+
 
 ### Router outlet
 
@@ -426,10 +475,6 @@ Para asignar las rutas dentro de una plantilla debemos agregar el atributo **rou
 ### Making requests
 
 ### Intercepting requests and responses
-
-## Guards
-
-## Interceptors
 
 ## Dev tools
 
